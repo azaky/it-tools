@@ -1,3 +1,4 @@
+import { execSync } from 'node:child_process';
 import { resolve } from 'node:path';
 import { URL, fileURLToPath } from 'node:url';
 
@@ -17,6 +18,23 @@ import svgLoader from 'vite-svg-loader';
 import { configDefaults } from 'vitest/config';
 
 const baseUrl = process.env.BASE_URL ?? '/';
+
+function getGitCommitSha() {
+  // Allow CI/Vercel-provided SHA to take precedence, otherwise read from local git.
+  const fromEnv = process.env.VITE_VERCEL_GIT_COMMIT_SHA ?? process.env.GITHUB_SHA;
+  if (fromEnv) {
+    return fromEnv;
+  }
+
+  try {
+    return execSync('git rev-parse HEAD').toString().trim();
+  }
+  catch {
+    return '';
+  }
+}
+
+const gitCommitSha = getGitCommitSha();
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -106,6 +124,7 @@ export default defineConfig({
   },
   define: {
     'import.meta.env.PACKAGE_VERSION': JSON.stringify(process.env.npm_package_version),
+    'import.meta.env.GIT_COMMIT_SHA': JSON.stringify(gitCommitSha),
   },
   test: {
     exclude: [...configDefaults.exclude, '**/*.e2e.spec.ts'],

@@ -12,7 +12,7 @@ export const config = figue({
       doc: 'Application last commit SHA version',
       format: 'string',
       default: '',
-      env: 'VITE_VERCEL_GIT_COMMIT_SHA',
+      env: 'GIT_COMMIT_SHA',
     },
     baseUrl: {
       doc: 'Application base url',
@@ -68,8 +68,9 @@ export const config = figue({
 })
   .loadEnv({
     ...import.meta.env,
-    // Because the string 'import.meta.env.PACKAGE_VERSION' is statically replaced during build time (see 'define' in vite.config.ts)
+    // Because these strings are statically replaced during build time (see 'define' in vite.config.ts)
     PACKAGE_VERSION: import.meta.env.PACKAGE_VERSION,
+    GIT_COMMIT_SHA: import.meta.env.GIT_COMMIT_SHA,
   })
   .validate()
   .getConfig();

@@ -17,7 +17,6 @@ import CollapsibleToolMenu from '@/components/CollapsibleToolMenu.vue';
 
 const themeVars = useThemeVars();
 const styleStore = useStyleStore();
-const version = config.app.version;
 const commitSha = config.app.lastCommitSha.slice(0, 7);
 
 const { tracker } = useTracker();
@@ -63,21 +62,15 @@ const tools = computed<ToolCategory[]>(() => [
           <div>
             IT-Tools
 
-            <c-link target="_blank" rel="noopener" :href="`https://github.com/CorentinTh/it-tools/tree/v${version}`">
-              v{{ version }}
+            <c-link
+              v-if="commitSha && commitSha.length > 0"
+              target="_blank"
+              rel="noopener"
+              type="primary"
+              :href="`https://github.com/azaky/it-tools/tree/${commitSha}`"
+            >
+              {{ commitSha }}
             </c-link>
-
-            <template v-if="commitSha && commitSha.length > 0">
-              -
-              <c-link
-                target="_blank"
-                rel="noopener"
-                type="primary"
-                :href="`https://github.com/CorentinTh/it-tools/tree/${commitSha}`"
-              >
-                {{ commitSha }}
-              </c-link>
-            </template>
           </div>
           <div>
             © {{ new Date().getFullYear() }}
