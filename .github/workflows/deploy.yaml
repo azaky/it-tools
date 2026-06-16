@@ -12,7 +12,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Build Docker image
-        run: docker build -t it-tools:latest .
+        run: docker build --build-arg GIT_COMMIT_SHA=${{ github.sha }} -t it-tools:latest .
 
       - name: Import to k3s containerd
         run: |

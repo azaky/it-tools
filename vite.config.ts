@@ -20,8 +20,13 @@ import { configDefaults } from 'vitest/config';
 const baseUrl = process.env.BASE_URL ?? '/';
 
 function getGitCommitSha() {
-  // Allow CI/Vercel-provided SHA to take precedence, otherwise read from local git.
-  const fromEnv = process.env.VITE_VERCEL_GIT_COMMIT_SHA ?? process.env.GITHUB_SHA;
+  // Allow a CI-provided SHA to take precedence (e.g. Docker/k8s builds where
+  // the build context has no .git directory or git binary), otherwise read
+  // from local git for dev/preview builds.
+  const fromEnv
+    = process.env.GIT_COMMIT_SHA
+    ?? process.env.VITE_VERCEL_GIT_COMMIT_SHA
+    ?? process.env.GITHUB_SHA;
   if (fromEnv) {
     return fromEnv;
   }
