@@ -293,6 +293,10 @@ tools:
     title: JWT parser
     description: Parse and decode your JSON Web Token (jwt) and display its content.
 
+  jwt-signature-checker:
+    title: JWT signature checker
+    description: Verify the signature of your JSON Web Token (jwt) using a shared secret or public key.
+
   date-converter:
     title: Date-time converter
     description: Convert date and time into the various different formats
