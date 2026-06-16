@@ -333,6 +333,10 @@ tools:
     title: JSON minify
     description: Minify and compress your JSON by removing unnecessary whitespace.
 
+  json-path-extractor:
+    title: JSON path extractor
+    description: Extract nested values from JSON using dot-notation paths. Supports multiple outputs with IntelliSense-like autocomplete.
+
   ulid-generator:
     title: ULID generator
     description: Generate random Universally Unique Lexicographically Sortable Identifier (ULID).
