@@ -38,19 +38,24 @@ const jwtValidation = useValidation({
 const parsedHeader = computed(() => {
   try {
     const parts = rawJwt.value.split('.');
-    if (parts.length !== 3) return null;
+    if (parts.length !== 3) {
+      return null;
+    }
     return JSON.parse(atob(parts[0]));
-  } catch {
+  }
+  catch {
     return null;
   }
 });
 
 const detectedAlgorithm = computed(() => parsedHeader.value?.alg ?? null);
 
-const isHmacAlgo = computed(() => ['HS256', 'HS384', 'HS512'].includes(detectedAlgorithm.value ?? ''));
+const _isHmacAlgo = computed(() => ['HS256', 'HS384', 'HS512'].includes(detectedAlgorithm.value ?? ''));
 
 const signatureResult = computed(() => {
-  if (!showSignatureChecker.value || !jwtValidation.isValid) return null;
+  if (!showSignatureChecker.value || !jwtValidation.isValid) {
+    return null;
+  }
   return withDefaultOnError(() => verifySignature(), null);
 });
 
@@ -85,7 +90,7 @@ function verifySignature(): { valid: boolean; expectedSignature: string } {
   return { valid: false, expectedSignature: `${keyType.value} verification not yet implemented` };
 }
 
-const { copy: copySecret } = useCopy({ source: secret });
+const { copy: _copySecret } = useCopy({ source: secret });
 </script>
 
 <template>
@@ -121,7 +126,7 @@ const { copy: copySecret } = useCopy({ source: secret });
     </c-card>
 
     <c-card v-if="jwtValidation.isValid">
-      <div flex items-center justify-between mb-3>
+      <div mb-3 flex items-center justify-between>
         <span text-lg font-bold>Signature verification</span>
         <n-switch v-model:value="showSignatureChecker" size="small" />
       </div>
@@ -179,9 +184,9 @@ const { copy: copySecret } = useCopy({ source: secret });
             </div>
           </n-card>
 
-          <div v-if="detectedAlgorithm" op-70 text-sm>
+          <div v-if="detectedAlgorithm" text-sm op-70>
             Detected algorithm: <code font-bold>{{ detectedAlgorithm }}</code>
-            <span v-if="keyType === 'hmac' && detectedAlgorithm !== hmacAlgorithm" text-red-500 ml-1>
+            <span v-if="keyType === 'hmac' && detectedAlgorithm !== hmacAlgorithm" ml-1 text-red-500>
               (mismatch with selected {{ hmacAlgorithm }})
             </span>
           </div>

@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import JSON5 from 'json5';
-import { Copy, Plus, Trash } from '@vicons/tabler';
+import { Plus, Trash } from '@vicons/tabler';
 import { useStorage } from '@vueuse/core';
-import { useCopy } from '@/composable/copy';
 import { useValidation } from '@/composable/validation';
 
 const rawJson = useStorage('json-path-extractor:input', '{"users": [{"name": "Alice", "age": 30}, {"name": "Bob", "age": 25}], "meta": {"count": 2}}');
@@ -12,7 +11,8 @@ let nextId = 2;
 const parsedJson = computed(() => {
   try {
     return JSON5.parse(rawJson.value);
-  } catch {
+  }
+  catch {
     return null;
   }
 });
@@ -28,18 +28,26 @@ const rawJsonValidation = useValidation({
 });
 
 function getNestedValue(obj: unknown, path: string): unknown {
-  if (!path) return obj;
+  if (!path) {
+    return obj;
+  }
   const keys = path.split('.');
   let current: unknown = obj;
   for (const key of keys) {
-    if (current === null || current === undefined) return undefined;
+    if (current === null || current === undefined) {
+      return undefined;
+    }
     if (Array.isArray(current)) {
-      const index = parseInt(key, 10);
-      if (isNaN(index)) return undefined;
+      const index = Number.parseInt(key, 10);
+      if (Number.isNaN(index)) {
+        return undefined;
+      }
       current = current[index];
-    } else if (typeof current === 'object') {
+    }
+    else if (typeof current === 'object') {
       current = (current as Record<string, unknown>)[key];
-    } else {
+    }
+    else {
       return undefined;
     }
   }
@@ -47,7 +55,9 @@ function getNestedValue(obj: unknown, path: string): unknown {
 }
 
 function getNextKeys(obj: unknown, currentInput: string): { key: string; fullPath: string; isObject: boolean }[] {
-  if (!obj || typeof obj !== 'object') return [];
+  if (!obj || typeof obj !== 'object') {
+    return [];
+  }
 
   let target: unknown = obj;
   let partial = currentInput;
@@ -59,7 +69,9 @@ function getNextKeys(obj: unknown, currentInput: string): { key: string; fullPat
     target = getNestedValue(obj, parentPath);
   }
 
-  if (!target || typeof target !== 'object') return [];
+  if (!target || typeof target !== 'object') {
+    return [];
+  }
 
   const keys = Array.isArray(target)
     ? target.map((_, i) => String(i))
@@ -67,7 +79,7 @@ function getNextKeys(obj: unknown, currentInput: string): { key: string; fullPat
 
   return keys
     .filter(key => key.startsWith(partial) && key !== partial)
-    .map(key => {
+    .map((key) => {
       const val = Array.isArray(target) ? (target as unknown[])[Number(key)] : (target as Record<string, unknown>)[key];
       return {
         key,
@@ -80,19 +92,25 @@ function getNextKeys(obj: unknown, currentInput: string): { key: string; fullPat
 }
 
 function formatInput() {
-  if (!rawJson.value.trim()) return;
+  if (!rawJson.value.trim()) {
+    return;
+  }
   try {
     const parsed = JSON5.parse(rawJson.value);
     rawJson.value = JSON.stringify(parsed, null, 2);
-  } catch { /* noop */ }
+  }
+  catch { /* noop */ }
 }
 
 function minifyInput() {
-  if (!rawJson.value.trim()) return;
+  if (!rawJson.value.trim()) {
+    return;
+  }
   try {
     const parsed = JSON5.parse(rawJson.value);
     rawJson.value = JSON.stringify(parsed);
-  } catch { /* noop */ }
+  }
+  catch { /* noop */ }
 }
 
 function addOutput() {
@@ -106,9 +124,13 @@ function removeOutput(id: number) {
 }
 
 function getOutputValue(path: string): string {
-  if (!parsedJson.value) return '';
+  if (!parsedJson.value) {
+    return '';
+  }
   const value = getNestedValue(parsedJson.value, path);
-  if (value === undefined) return '// Path not found';
+  if (value === undefined) {
+    return '// Path not found';
+  }
   return JSON.stringify(value, null, 2);
 }
 
@@ -116,7 +138,9 @@ const focusedOutputId = ref<number | null>(null);
 const activeIndex = ref(-1);
 
 function getSuggestions(path: string) {
-  if (!parsedJson.value) return [];
+  if (!parsedJson.value) {
+    return [];
+  }
   return getNextKeys(parsedJson.value, path);
 }
 
@@ -130,20 +154,25 @@ function selectSuggestion(output: { id: number; path: string }, suggestion: { fu
 
 function handlePathKeydown(e: KeyboardEvent, output: { id: number; path: string }) {
   const suggestions = getSuggestions(output.path);
-  if (!suggestions.length) return;
+  if (!suggestions.length) {
+    return;
+  }
 
   if (e.key === 'ArrowDown') {
     e.preventDefault();
     activeIndex.value = Math.min(activeIndex.value + 1, suggestions.length - 1);
-  } else if (e.key === 'ArrowUp') {
+  }
+  else if (e.key === 'ArrowUp') {
     e.preventDefault();
     activeIndex.value = Math.max(activeIndex.value - 1, 0);
-  } else if (e.key === 'Enter' || e.key === 'Tab') {
+  }
+  else if (e.key === 'Enter' || e.key === 'Tab') {
     if (activeIndex.value >= 0 && activeIndex.value < suggestions.length) {
       e.preventDefault();
       selectSuggestion(output, suggestions[activeIndex.value]);
     }
-  } else if (e.key === 'Escape') {
+  }
+  else if (e.key === 'Escape') {
     focusedOutputId.value = null;
   }
 }
@@ -154,7 +183,9 @@ function handlePathFocus(id: number) {
 }
 
 function handlePathBlur() {
-  setTimeout(() => { focusedOutputId.value = null; }, 150);
+  setTimeout(() => {
+    focusedOutputId.value = null;
+  }, 150);
 }
 
 watch(() => outputs.value.map(o => o.path), () => {
@@ -164,7 +195,7 @@ watch(() => outputs.value.map(o => o.path), () => {
 
 <template>
   <div>
-    <div flex gap-2 mb-3>
+    <div mb-3 flex gap-2>
       <c-button @click="formatInput()">
         Format
       </c-button>
@@ -192,7 +223,7 @@ watch(() => outputs.value.map(o => o.path), () => {
       />
     </n-form-item>
 
-    <div flex justify-between items-center mb-3>
+    <div mb-3 flex items-center justify-between>
       <n-h3 style="margin: 0">
         Outputs
       </n-h3>
@@ -204,7 +235,7 @@ watch(() => outputs.value.map(o => o.path), () => {
 
     <div v-for="output in outputs" :key="output.id" mb-4>
       <c-card>
-        <div flex gap-2 items-center mb-3>
+        <div mb-3 flex items-center gap-2>
           <div relative flex-1>
             <n-input
               v-model:value="output.path"
